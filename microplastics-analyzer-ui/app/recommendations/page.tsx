@@ -53,7 +53,8 @@ export default function RecommendationsPage() {
     const recommendations = [];
 
     // High impact recommendations based on risk distribution
-    if (analysisStats.risk_distribution.high > 0) {
+    // Add null checks for nested properties
+    if (analysisStats.risk_distribution?.high > 0) {
       recommendations.push({
         category: "High Impact",
         icon: "🚫",
@@ -65,22 +66,25 @@ export default function RecommendationsPage() {
     }
 
     // Add recommendations based on common items
-    analysisStats.common_items.forEach(item => {
-      if (item.average_risk === 'HIGH') {
-        recommendations.push({
-          category: "High Impact",
-          icon: "🔄",
-          title: `Replace ${item.food}`,
-          description: `This item appears frequently in your diet with high microplastic levels.`,
-          tips: [
-            "Find alternative products",
-            "Check for glass-packaged options",
-            "Consider making fresh at home"
-          ],
-          completed: false,
-        });
-      }
-    });
+    // Check if common_items exists and is an array
+    if (analysisStats.common_items && Array.isArray(analysisStats.common_items)) {
+      analysisStats.common_items.forEach(item => {
+        if (item?.average_risk === 'HIGH') {
+          recommendations.push({
+            category: "High Impact",
+            icon: "🔄",
+            title: `Replace ${item.food || 'this item'}`,
+            description: `This item appears frequently in your diet with high microplastic levels.`,
+            tips: [
+              "Find alternative products",
+              "Check for glass-packaged options",
+              "Consider making fresh at home"
+            ],
+            completed: false,
+          });
+        }
+      });
+    }
 
     // Add general recommendations
     recommendations.push(
@@ -226,9 +230,9 @@ export default function RecommendationsPage() {
                 <h3 className={`font-semibold ${themeClasses.textPrimary}`}>Analysis Insights</h3>
               </div>
               <p className={`text-sm ${themeClasses.textSecondary}`}>
-                {analysisStats.common_items[0] 
+                {analysisStats.common_items?.[0]?.food
                   ? `Your most frequently analyzed food is ${analysisStats.common_items[0].food} with ${
-                      analysisStats.common_items[0].average_risk.toLowerCase()
+                      analysisStats.common_items[0].average_risk?.toLowerCase() || 'unknown'
                     } risk levels. Consider alternatives to reduce exposure.`
                   : 'Start analyzing more foods to get personalized recommendations!'}
               </p>

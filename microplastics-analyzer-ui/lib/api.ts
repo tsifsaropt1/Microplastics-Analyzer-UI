@@ -17,6 +17,29 @@ export interface AnalysisResult {
   parsed_results: FoodItem[];
 }
 
+// Interfaces for the stats
+export interface UserStats {
+  completed_recommendations: number;
+  pending_recommendations: number;
+  total_analyses: number;
+  last_analysis: string;
+}
+
+export interface AnalysisStatistics {
+  total_analyses: number;
+  risk_distribution: {
+    low: number;
+    medium: number;
+    high: number;
+  };
+  common_items: Array<{
+    food: string;
+    count: number;
+    average_risk: string;
+  }>;
+  recent_analyses: any[];
+}
+
 // Main function to analyze food images
 export const analyzeFood = async (imageFile: File): Promise<AnalysisResult> => {
   const formData = new FormData();
@@ -87,6 +110,34 @@ export const analyzeFood = async (imageFile: File): Promise<AnalysisResult> => {
     return result;
   } catch (error) {
     console.error('API call failed:', error);
+    throw error;
+  }
+};
+
+// Get user stats from backend
+export const getUserStats = async (): Promise<UserStats> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/stats`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch user stats');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch user stats:', error);
+    throw error;
+  }
+};
+
+// Get analysis stats from backend
+export const getAnalysisStats = async (): Promise<AnalysisStatistics> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/analysis/stats`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch analysis stats');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch analysis stats:', error);
     throw error;
   }
 };
